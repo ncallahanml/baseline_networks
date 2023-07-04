@@ -146,4 +146,19 @@ class WaveGen():
         background = np.zeros((n_samples, wave.shape[1]), dtype=np.float32)
         background[:,self.indices] = self.noise(n_samples) 
         samples = wave + background
-        return samples
+        self.samples = samples
+        return self
+    
+    def fliph(self, p=.5):
+        assert 0 < p < 1
+        n_samples = self.samples.shape[0]
+        indices = np.random.choice(n_samples, size=int(n_samples * p))
+        self.samples[indices,:] = self.samples[indices,:][:,::-1]
+        return self
+    
+    def flipv(self, p=.5):
+        assert 0 < p < 1
+        n_samples = self.samples.shape[0]
+        indices = np.random.choice(n_samples, size=int(n_samples * p))
+        self.samples[indices,:] = self.samples[indices,:][::-1,:]
+        return self

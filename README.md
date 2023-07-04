@@ -23,3 +23,9 @@ Build a neural network that can accurately estimate parameters of a sine functio
 - Denoised : array_like
 - Period/Parameters : float/array_like
 - Sine Indices : array_like
+
+# Model Goals
+- Latent Representation
+- Denoising
+- Distribution Separation
+- Probabilistic Prediction

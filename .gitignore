@@ -1,4 +1,10 @@
 .ipynb_checkpoints/
+.__pycache__/
 
 *.pt
 *.csv
+
+!best_cnn_regressor.pt
+!training_io_2023-07-02.csv
+
+SineAE.ipynb

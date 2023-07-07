@@ -143,7 +143,7 @@ class WaveGen():
             print('Entered')
             self.indices = np.linspace(0, self.size-1, self.size).astype(np.int32)
         wave = np.expand_dims(self.wave, axis=0) # broadcast
-        self.wave = wave
+        self.wave = np.repeat(wave, n_samples, axis=0)
         background = np.zeros((n_samples, wave.shape[1]), dtype=np.float32)
         background[:,self.indices] = self.noise(n_samples) 
         samples = wave + background

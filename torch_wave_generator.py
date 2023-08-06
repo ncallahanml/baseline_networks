@@ -3,6 +3,7 @@ import scipy.stats as st
 import torch
 from math import pi
 from copy import deepcopy
+import itertools
 
 def add_noise(arr, distribution='gaussian', symmetric=True, noise_amplitude=1, method='additive', bias=0):
     noise_len = len(arr)
@@ -53,33 +54,58 @@ class RecursiveWaveGen():
     def _phase_angle(self, x, phase_angle):
         return x + phase_angle
 
-    def phase_angle(self, phase_angle=0):
+    def phase_angle(self, phase_angle):
         self.operation_dict['_phase_angle'] = (phase_angle,)
         return
 
     def _n_periods(self, _, n_periods):
         return torch.linspace(0, n_periods * 2 * pi, size=self.size)
 
-    def n_periods(self, n_periods=5):
+    def n_periods(self, n_periods):
         self.operation_dict['_phase_angle'] = (n_periods,)
         return self
     
     def _bias(self, x, bias):
         return x + bias
 
-    def bias(self, bias=0):
+    def bias(self, bias):
         self.operation_dict['_bias'] = (bias, )
         return self
 
-    def recursive_sample(self, x, op_dict):
-        raise NotImplemented
-        for func_name, args in sorted(self.operation_dict.items(), key=self.key_func):
-            xs = [getattr(self, func_name)(x, *arg) for arg in args]
-        return x
+    def opt_sample(self, xs, op_dict):
+        assert '_n_periods' in self.operation_dict
+        total_len = torch.prod([len(op) for op in op_dict.values() if isinstance(op, list)])
+        x_list = list()
+        n_periodss = op_dict['n_periods']
+        for n_periods in n_periodss:
+            x = torch.linspace(0, n_periods * 2 * pi, size=self.size).unsqueeze(1)
+            x = torch.repeat(x, total_len // len(n_periodss), dim=1)
+            x_list.append(x)
+        xs = torch.cat(x_list, dim=1)
+        assert xs.shape[1] == total_len
+        assert xs.shape[0] == self.size
+        del op_dict['n_periods']
+        for func_name, args in sorted(op_dict.items(), key=lambda x : self.key_dict[x]):
+            if isinstance(args, list):
+                n_args = len(args)
+                for i, arg in enumerate(args):
+                    # this needs to be fixed for proper combinatorics
+                    xs[:,::n_args + i] = getattr(self, func_name)(xs[:,indices], *arg)
+            else:
+                xs = getattr(self, func_name)(xs, *arg)
+        return xs
+
+    def recursive_sample(self, xs, op_dict):
+        for func_name, args in sorted(op_dict.items(), key=lambda x : self.key_dict[x]):
+            if isinstance(args, (list)):
+                xs = [getattr(self, func_name)(x, *arg) for x, arg in itertools.product(xs, args)]
+            else:
+                xs = [getattr(self, func_name)(x, *args) for x in xs]
+        return xs
     
     def sample(self):
         assert '_n_periods' in self.operation_dict
-        for func_name, args in sorted(self.operation_dict.items(), key=self.key_func):
+        for func_name, args in sorted(self.operation_dict.items(), key=lambda x : self.key_dict[x]):
             x = getattr(self, func_name)(x, *args)
         return x
 
@@ -100,7 +126,7 @@ class RecursiveWaveGen():
     def _amp(self, x, amp):
         return x * amp
 
-    def amp(self, amp=1):
+    def amp(self, amp):
         self.operation_dict['_amp'] = amp
         return self
     
@@ -109,7 +135,7 @@ class RecursiveWaveGen():
         x[indices,:] = x[indices,:][:,::-1]
         return x
 
-    def fliph(self, p=0):
+    def fliph(self, p):
         assert 0 < p < 1
         self.operation_dict['_fliph'] = p
         return self
@@ -119,7 +145,7 @@ class RecursiveWaveGen():
         x[indices,:] = x[indices,:][:,::-1]
         return self
     
-    def flipv(self, p=0):
+    def flipv(self, p):
         assert 0 < p < 1
         self.operation_dict['_flipv'] = p
         return self

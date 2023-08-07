@@ -39,7 +39,7 @@ class RecursiveWaveGen():
         ## method in ('recursive', '')
         self.size = size
         self.operation_dict = {
-            '_n_periods' : 5,
+            '_n_periods' : (5, ),
         }
         self.key_dict = {
             '_n_periods' : 0,
@@ -61,7 +61,7 @@ class RecursiveWaveGen():
         return
 
     def _n_periods(self, _, n_periods):
-        return torch.linspace(0, n_periods * 2 * pi, size=self.size)
+        return torch.linspace(0, n_periods * 2 * pi, self.size)
 
     def n_periods(self, n_periods):
         self.operation_dict['_phase_angle'] = n_periods,
@@ -80,7 +80,7 @@ class RecursiveWaveGen():
         x_list = list()
         n_periodss = op_dict['n_periods']
         for n_periods in n_periodss:
-            x = torch.linspace(0, n_periods * 2 * pi, size=self.size).unsqueeze(1)
+            x = torch.linspace(0, n_periods * 2 * pi, self.size).unsqueeze(1)
             x = torch.repeat(x, total_len // len(n_periodss), dim=1)
             x_list.append(x)
         xs = torch.cat(x_list, dim=1)
@@ -88,7 +88,7 @@ class RecursiveWaveGen():
         assert xs.shape[0] == self.size
         del op_dict['n_periods']
         total_partitions = 1
-        for func_name, args in sorted(op_dict.items(), key=lambda x : self.key_dict[x]):
+        for func_name, args in sorted(op_dict.items(), key=lambda x : self.key_dict[x[0]]):
             if isinstance(args, list):
                 n_args = len(args)
                 for i in range(total_partitions):
@@ -102,23 +102,25 @@ class RecursiveWaveGen():
         return xs
 
     def recursive_sample(self, xs, op_dict):
-        for func_name, args in sorted(op_dict.items(), key=lambda x : self.key_dict[x]):
+        for func_name, args in sorted(op_dict.items(), key=lambda x : self.key_dict[x[0]]):
             if isinstance(args, (list)):
                 xs = [getattr(self, func_name)(x, *arg) for x, arg in itertools.product(xs, args)]
             else:
                 xs = [getattr(self, func_name)(x, *args) for x in xs]
         return xs
     
-    def sample(self, n_samples=1):
+    def sample(self):
+        x = None
         assert '_n_periods' in self.operation_dict
-        for func_name, args in sorted(self.operation_dict.items(), key=lambda x : self.key_dict[x]):
+        for func_name, args in sorted(self.operation_dict.items(), key=lambda x : self.key_dict[x[0]]):
             assert isinstance(args, tuple), type(args)
             x = getattr(self, func_name)(x, *args)
         return x
     
     def _repeat(self, x, n_samples):
-        x = x.repeat(n_samples, 1, 1)
-        assert x.shape[1] == n_samples, x.shape
+        print(x.shape)
+        x = x.unsqueeze(0).repeat(n_samples, 1)
+        assert x.shape[0] == n_samples, x.shape
         return x
     
     def repeat(self, n_samples):

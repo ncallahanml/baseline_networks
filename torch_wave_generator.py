@@ -48,6 +48,8 @@ class RecursiveWaveGen():
             '_cos' : 8,
             '_amp' : 12,
             '_bias' : 13,
+            '_repeat' : 20,
+            '_gaussian_noise' : 30,
         }
         return
     
@@ -55,21 +57,21 @@ class RecursiveWaveGen():
         return x + phase_angle
 
     def phase_angle(self, phase_angle):
-        self.operation_dict['_phase_angle'] = (phase_angle,)
+        self.operation_dict['_phase_angle'] = phase_angle,
         return
 
     def _n_periods(self, _, n_periods):
         return torch.linspace(0, n_periods * 2 * pi, size=self.size)
 
     def n_periods(self, n_periods):
-        self.operation_dict['_phase_angle'] = (n_periods,)
+        self.operation_dict['_phase_angle'] = n_periods,
         return self
     
     def _bias(self, x, bias):
         return x + bias
 
     def bias(self, bias):
-        self.operation_dict['_bias'] = (bias, )
+        self.operation_dict['_bias'] = bias, 
         return self
 
     def opt_sample(self, xs, op_dict):
@@ -85,12 +87,16 @@ class RecursiveWaveGen():
         assert xs.shape[1] == total_len
         assert xs.shape[0] == self.size
         del op_dict['n_periods']
+        total_partitions = 1
         for func_name, args in sorted(op_dict.items(), key=lambda x : self.key_dict[x]):
             if isinstance(args, list):
                 n_args = len(args)
-                for i, arg in enumerate(args):
-                    # this needs to be fixed for proper combinatorics
-                    xs[:,::n_args + i] = getattr(self, func_name)(xs[:,indices], *arg)
+                for i in range(total_partitions):
+                    for j, arg in enumerate(args):
+                        # this needs to be fixed for proper combinatorics
+                        start = i * xs.shape[0] // total_partitions
+                        xs[:,start::n_args + j] = getattr(self, func_name)(xs[:,start::n_args + j], *arg)
+                total_partitions *= n_args
             else:
                 xs = getattr(self, func_name)(xs, *arg)
         return xs
@@ -103,31 +109,41 @@ class RecursiveWaveGen():
                 xs = [getattr(self, func_name)(x, *args) for x in xs]
         return xs
     
-    def sample(self):
+    def sample(self, n_samples=1):
         assert '_n_periods' in self.operation_dict
         for func_name, args in sorted(self.operation_dict.items(), key=lambda x : self.key_dict[x]):
+            assert isinstance(args, tuple), type(args)
             x = getattr(self, func_name)(x, *args)
         return x
+    
+    def _repeat(self, x, n_samples):
+        x = x.repeat(n_samples, 1, 1)
+        assert x.shape[1] == n_samples, x.shape
+        return x
+    
+    def repeat(self, n_samples):
+        self.operation_dict['_repeat'] = n_samples,
+        return self
 
     def _cos(self, x, _):
         return torch.cos(x)
 
     def cos(self):
-        self.operation_dict['_cos'] = None
+        self.operation_dict['_cos'] = None,
         return self
     
     def _sin(self, x, _):
         return torch.sin(x)
 
     def sin(self):
-        self.operation_dict['_sin'] = None
+        self.operation_dict['_sin'] = None,
         return self
 
     def _amp(self, x, amp):
         return x * amp
 
     def amp(self, amp):
-        self.operation_dict['_amp'] = amp
+        self.operation_dict['_amp'] = amp,
         return self
     
     def _fliph(self, x, p):
@@ -137,7 +153,7 @@ class RecursiveWaveGen():
 
     def fliph(self, p):
         assert 0 < p < 1
-        self.operation_dict['_fliph'] = p
+        self.operation_dict['_fliph'] = p,
         return self
 
     def _flipv(self, x, p):
@@ -147,5 +163,13 @@ class RecursiveWaveGen():
     
     def flipv(self, p):
         assert 0 < p < 1
-        self.operation_dict['_flipv'] = p
+        self.operation_dict['_flipv'] = p,
+        return self
+    
+    def _gaussian_noise(self, x, mean, std):
+        xn = torch.normal(mean=mean, std=std, size=x.size())
+        return x + xn
+    
+    def gaussian_noise(self, mean, std):
+        self.operation_dict['_gaussian_noise'] = (mean, std)
         return self

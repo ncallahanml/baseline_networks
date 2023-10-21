@@ -1,9 +1,10 @@
-.ipynb_checkpoints/
-.__pycache__/
+.ipynb_checkpoints/*
+__pycache__/*
+lightning_logs/*
 
 *.pt
 *.csv
 
 !best_cnn_regressor.pt
 !best_dae_model.pt
-!training_io_2023-07-02.csv
+FunctionalGenerator.ipynb

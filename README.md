@@ -1,8 +1,8 @@
-# Goal
+## Simple 1D ANNs
 Build basic neural networks with varying architectures that use sinusoidal input data. Includes a variety of dataloaders and PyTorch training additions, including [Lightning](https://lightning.ai/docs/pytorch/stable/) 
 and [Tensorboard](https://pytorch.org/docs/stable/tensorboard.html) for reference. Using sinusoidal data with noise should prove the simplest version of viability for the training procedure while not requiring much training time, allowing complexity for real data and higher dimensional inputs to be built out later.
 
-# Sine Wave Generation
+## Sine Wave Generation
 #### PyTorch `RecursiveWaveGen`
 - Recursive generator for sine waves with combinations of input hyperparameters
 - Input parameters are lazily evaluated, meaning each parameter method call adds expected operations to the class until `.sample()` is called, causing the tensors to be instantiated and returned as a single tensor
@@ -24,7 +24,7 @@ The following can be adjusted with method calls:
 - Custom adjustment of phase angle
 - Alteration of number of periods
 
-# Current Model Progress
+## Current Model Progress
 | **Model** | **File** | **Status** | **Description** |
 |:---------:|:--------:|:----------:|:---------------:|
 | Bayesian Regressor | [SineBayesianRegressor](SineBayesianRegressor.ipynb) | Complete, Unrefined | Probabilistic Linear Regression Model |

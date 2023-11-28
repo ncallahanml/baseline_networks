@@ -39,16 +39,17 @@ Notebook Status :
 - Untested : General code structure is finished, but training/visuals need to be tested
 - In Progress : Enough code is available to view the intent, but the model is not ready for testing
 
-| **File** | **Status** | **Description** |
-|:--------:|:----------:|:---------------:|
-| [SineBayesianRegressor](SineBayesianRegressor.ipynb) | Unrefined | Probabilistic Linear Regression Model |
-| [SineBinarySeparator](SineBinarySeparator.ipynb) | Complete | Time series segmentation intended to maximize distribution differences while being constrained by autocorrelation in each class |
-| [CNN-LSTM](CNNLSTM.ipynb) | Untested | Simple 1D CNN for feeding down to an LSTM forward predictor |
-| [TCN](CNNRegressor.ipynb) | Complete | Time convolutional pooling down to linear model for regressing scalar value |
-| [DAE](DAE.ipynb) | Complete | Denoising autoencoder for reconstructing sine waves from bottleneck |
-| [Linear Ensemble](LinearEnsemble.ipynb) | Unrefined | Simple linear regressor with training for synthetic compositions of weights, allowing objective measure of coefficients against actual weights |
-| [Siamese](Siamese.ipynb) | Unrefined | Siamese network for similarity learning between two sine waves |
-| [Unet](Unet.ipynb) | Unrefined | Single dimensional UNet for supervised time series segmentation labeling |
-| [Forward Ranker](ForwardRanker.ipynb) | Unrefined | Model that predicts forward time series rankings with limited parameters |
-| [DDPM](DDPM.ipynb) | In Progress | Single dimensional denoising diffusion probabilistic model for generating new data |
-| [GCN](GCN.ipynb) | In Progress | Graph convolutional network for predicting signals composited from different lags |
+| **File** | **Status** | **Description** | **Implementation Library** | **Extra** |
+|:--------:|:----------:|:---------------:|:--------------------------:|:---------:|
+| [Bayesian Regressor](BayesianRegressor.ipynb) | Unrefined | Probabilistic Linear Regression Model | PyTorch | Torch BNN Library |  
+| [Binary Separator](BinaryDistributionSeparator.ipynb) | Complete | Time series segmentation intended to maximize distribution differences while being constrained by autocorrelation in each class | PyTorch | |  
+| [CNN LSTM](CNNLSTM.ipynb) | Untested | Simple 1D CNN for feeding down to an LSTM forward predictor | PyTorch | Ray Tune |  
+| [TCN](CNNRegressor.ipynb) | Complete | Time convolutional pooling down to linear model for regressing scalar value | PyTorch | |  
+| [DAE](DAE.ipynb) | Complete | Denoising autoencoder for reconstructing sine waves from bottleneck | PyTorch | |  
+| [Linear Ensemble](LinearEnsemble.ipynb) | Unrefined | Simple linear regressor with training for synthetic compositions of weights, allowing objective measure of coefficients against actual weights | PyTorch | |  
+| [Siamese](Siamese.ipynb) | Unrefined | Siamese network for similarity learning between two sine waves | PyTorch | |  
+| [Unet](Unet.ipynb) | Unrefined | Single dimensional UNet for supervised time series segmentation labeling | PyTorch | |  
+| [Forward Ranker](ForwardRanker.ipynb) | Unrefined | Model that predicts forward time series rankings with limited parameters | PyTorch | | 
+| [DDPM](DDPM.ipynb) | In Progress | Single dimensional denoising diffusion probabilistic model for generating new data | PyTorch |
+| [Sharpe Regressor](PortfolioOptimizer.ipynb) | In Progress | Simple linear model optimizing for sharpe loss and alternative financial portfolio metrics as an alternative optimizer | Flax | |
+| [Bidirectional Unet Encoding](UnetBiGRU.ipynb) | In Progress | Simple Unet encoder/decoder for extracting 3D features for Bidirectional GRU analysis | Flax | |  

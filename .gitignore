@@ -1,10 +1,13 @@
 .ipynb_checkpoints/*
 __pycache__/*
 lightning_logs/*
+model_checkpoints/*
 runs/*
 
 *.pt
+*.pth
 *.csv
+*.log
 
 !best_cnn_regressor.pt
 !best_dae_model.pt
